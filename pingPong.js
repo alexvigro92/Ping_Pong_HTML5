@@ -16,6 +16,11 @@ let paddleHeight = 100;
 
 let paddle2PlayerY = 10;
 let paddle2Height = 100;
+let paddle2Limit = 25;
+
+let playerScore = 0;
+let player2Score = 0;
+
 
 window.onload = () => {
   canvas = document.getElementById('canvasGame');
@@ -27,13 +32,12 @@ window.onload = () => {
 
   canvas.addEventListener('mousemove', (event) => {
     let mousePos = calculateMousePaddle(event);
-    paddle2PlayerY = mousePos.y - (paddleHeight/2);
     paddlePlayerY = mousePos.y - (paddleHeight/2);
   });
 
   window.addEventListener('keydown',(event) => {
     let keyPressedPos = calculateKeyPaddle(event.key);
-    paddle2PlayerY = paddle2PlayerY + keyPressedPos;
+    paddlePlayerY = paddlePlayerY + keyPressedPos;
   },false);
 }
 
@@ -64,17 +68,34 @@ calculateKeyPaddle = (keyPressed) => {
    }
 }
 
+computerAI = () => {
+  let paddle2YMiddle = paddle2PlayerY + (paddleHeight/2)
+    if (paddle2YMiddle < ballY-paddle2Limit) {
+      paddle2PlayerY += 6;
+    }else if(paddle2YMiddle > ballY+paddle2Limit){
+      paddle2PlayerY -= 6;
+    }
+}
+
 moveEverything = () => {
+  computerAI();
+
   ballX += ballSpeedX;
   ballY += ballSpeedY;
   if(ballX >= (canvas.width-5)){
+    playerScore++;
     resetBall();
   }else if(ballX <= 0){
+    player2Score++;
     resetBall();
   }else if((ballY > paddlePlayerY) && (ballY < (paddlePlayerY + paddleHeight)) && (ballX == (paddleSpace+paddleWidth))) {
     ballSpeedX = -ballSpeedX;
+    let deltaY = ballY - (paddlePlayerY + paddleHeight/2);
+    ballSpeedY = deltaY * 0.35;
   }else if((ballY > paddle2PlayerY) && (ballY < (paddle2PlayerY + paddleHeight)) && (ballX == (canvas.width-(paddleSpace+paddleWidth)))) {
     ballSpeedX = -ballSpeedX;
+    let deltaY = ballY - (paddle2PlayerY + paddleHeight/2);
+    ballSpeedY = deltaY * 0.35;
   }
 
   if(ballY >= (canvas.height-5)){
@@ -96,6 +117,12 @@ drawEverything = () => {
 
   //this line draws the ball
   colorBall(ballX,ballY,5,'white')
+
+  canvasContext.fillText("Player 1",100,100)
+  canvasContext.fillText("Player 2",((canvas.width - 150)),100)
+
+  canvasContext.fillText(playerScore,100,120)
+  canvasContext.fillText(player2Score,((canvas.width - 150)),120)
 }
 
 colorBall = (leftX,topY,width,color) => {
