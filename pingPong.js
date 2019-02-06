@@ -18,9 +18,12 @@ let paddle2PlayerY = 10;
 let paddle2Height = 100;
 let paddle2Limit = 25;
 
+let playerWins = false;
+
 let playerScore = 0;
 let player2Score = 0;
 
+const WINNING_SCORE = 1;
 
 window.onload = () => {
   canvas = document.getElementById('canvasGame');
@@ -39,9 +42,18 @@ window.onload = () => {
     let keyPressedPos = calculateKeyPaddle(event.key);
     paddlePlayerY = paddlePlayerY + keyPressedPos;
   },false);
+
+  window.addEventListener('click',(event) => {
+    if(playerWins) {
+      playerWins = false;
+      playerScore = 0;
+      player2Score = 0;
+    }
+  },false);
 }
 
 resetBall = () => {
+  verifyScore();
   ballSpeedX = -ballSpeedX;
   ballX = canvas.width/2;
   ballY = canvas.height/2;
@@ -57,6 +69,12 @@ calculateMousePaddle = (event) => {
      y: mouseY
    };
    return positionMouse;
+}
+
+verifyScore = () =>{
+  if (playerScore >= WINNING_SCORE || player2Score >= WINNING_SCORE) {
+    playerWins = true;
+  }
 }
 
 calculateKeyPaddle = (keyPressed) => {
@@ -77,7 +95,16 @@ computerAI = () => {
     }
 }
 
+drawMiddleLines = () => {
+  for (var i = 0; i < canvas.height; i+=30) {
+    colorGame(canvas.width/2-1,i,2,20,'white')
+  }
+}
+
 moveEverything = () => {
+  if (playerWins) {
+    return;
+  }
   computerAI();
 
   ballX += ballSpeedX;
@@ -108,6 +135,22 @@ moveEverything = () => {
 drawEverything = () => {
   //this line draws the space for the game
   colorGame(0,0,canvas.width,canvas.height,'black');
+
+  //verify if a player wins
+  if (playerWins) {
+    canvasContext.fillStyle = 'white';
+    if (playerScore >= WINNING_SCORE){
+      canvasContext.fillText("Player 1 won",((canvas.width/2)-50),200)
+    }
+    else if(player2Score >= WINNING_SCORE){
+      canvasContext.fillText("Player 2 won",((canvas.width/2)-50),200)
+    }
+    canvasContext.fillText("Click to continue",((canvas.width/2)-50),220)
+    return;
+  }
+
+  //this line draws the lines in the middle
+  drawMiddleLines();
 
   //this line draws the paddle
   colorGame(paddleSpace,paddlePlayerY,paddleWidth,paddleHeight,'white');
